@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Altamash Hospital - Blood Storage | Lab Staff Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #005eb8;
+            --secondary-color: #c8102e;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 480px;
+            transition: transform 0.3s;
+        }
+        
+        .login-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header i {
+            font-size: 60px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .login-header h2 {
+            color: var(--dark-color);
+            font-weight: 700;
+        }
+        
+        .staff-badge {
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #495057;
+        }
+        
+        .main-app {
+            display: none;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .hospital-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .user-info {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 14px;
+        }
+        
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            border: none;
+            border-radius: 10px;
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .receipt {
+            border: 1px solid #ddd;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            max-width: 280px;
+            margin: 0 auto;
+            font-size: 12px;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .badge-expired { background-color: var(--secondary-color); color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-valid { background-color: #28a745; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-received { background-color: #17a2b8; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
+        
+        @media print {
+            body * { visibility: hidden; margin: 0; padding: 0; }
+            #printable-receipt, #printable-receipt * { visibility: visible; }
+            #printable-receipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 80mm;
+                padding: 5px;
+                background: white;
+            }
+            @page { margin: 0; size: 80mm auto; }
+            .no-print { display: none; }
+        }
+        
+        .logout-btn {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .logout-btn:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+        
+        .setup-instructions {
+            background-color: #e9f7fe;
+            border-left: 4px solid var(--primary-color);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fas fa-hospital-user"></i>
+            <h2>ALTAMASH GENERAL HOSPITAL</h2>
+            <p>Laboratory Blood Storage System</p>
+            <hr>
+            <i class="fas fa-flask" style="font-size: 40px; color: var(--secondary-color);"></i>
+        </div>
+        
+        <div class="staff-badge mb-3">
+            <i class="fas fa-users"></i> Authorized Laboratory Staff
+        </div>
+        
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="staffSelect" class="form-label"><i class="fas fa-id-badge"></i> Select Username</label>
+                <select class="form-select" id="staffSelect" required>
+                    <option value="">-- Select Your Username --</option>
+                    <option value="RAIKHTA-LAB|122">RAIKHTA-LAB</option>
+                    <option value="MEHBOOB-LAB|123">MEHBOOB-LAB</option>
+                    <option value="SYED MEHMOOD-LAB|124">SYED MEHMOOD-LAB</option>
+                    <option value="ALI NAWAZ-LAB|125">ALI NAWAZ-LAB</option>
+                    <option value="ALI REHMAN-LAB|126">ALI REHMAN-LAB</option>
+                    <option value="ADNAN-LAB|127">ADNAN-LAB</option>
+                    <option value="SUFFYAN-LAB|128">SUFFYAN-LAB</option>
+                    <option value="AIJAZ-LAB|129">AIJAZ-LAB</option>
+                    <option value="WAHEED-LAB|130">WAHEED-LAB</option>
+                    <option value="SADIQ-LAB|131">SADIQ-LAB</option>
+                    <option value="EJAZ-LAB|132">EJAZ-LAB</option>
+                    <option value="NOOR-LAB|133">NOOR-LAB</option>
+                    <option value="ARSHAD-LAB|134">ARSHAD-LAB</option>
+                    <option value="SABA-LAB|135">SABA-LAB</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label"><i class="fas fa-lock"></i> Password</label>
+                <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-2"><i class="fas fa-sign-in-alt"></i> Login</button>
+        </form>
+        <div class="text-center mt-3">
+            <small class="text-muted"><i class="fas fa-shield-alt"></i> Authorized Personnel Only</small>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN APPLICATION -->
+<div id="mainApp" class="main-app">
+    <div class="header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <div class="hospital-name">ALTAMASH GENERAL HOSPITAL</div>
+                    <h5 class="mb-0"><i class="fas fa-vial"></i> Laboratory Blood Storage Management</h5>
+                </div>
+                <div class="d-flex gap-2 align-items-center mt-2 mt-sm-0">
+                    <span class="user-info"><i class="fas fa-user-check"></i> <span id="currentUserName">Staff</span></span>
+                    <div class="logout-btn btn btn-outline-light btn-sm" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </div>
+                </div>
+            </div>
+            <p class="mt-2 mb-0 small">Efficient blood sample tracking & Google Sheets backup</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="row mb-4 no-print">
+            <div class="col-md-3 col-6"><div class="card stats-card text-center p-3"><div class="stats-number" id="totalRecords">0</div><div class="stats-label">Total Records</div></div></div>
+            <div class="col-md-3 col-6"><div class="card stats-card text-center p-3"><div class="stats-number" id="todayRecords">0</div><div class="stats-label">Today's Entries</div></div></div>
+            <div class="col-md-3 col-6"><div class="card stats-card text-center p-3"><div class="stats-number" id="expiredRecords">0</div><div class="stats-label">Expired Samples</div></div></div>
+            <div class="col-md-3 col-6"><div class="card stats-card text-center p-3"><div class="stats-number" id="validRecords">0</div><div class="stats-label">Valid Samples</div></div></div>
+        </div>
+
+        <div class="row">
+            <!-- Entry Form -->
+            <div class="col-lg-6 no-print">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-edit"></i> Blood Storage Entry Form</div>
+                    <div class="card-body">
+                        <div class="setup-instructions mb-3">
+                            <i class="fas fa-cloud-upload-alt"></i> <strong>Auto Google Sheets Backup:</strong> Each entry automatically syncs. 
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#googleSheetsModal" class="alert-link">Click to setup Google Sheets</a>
+                        </div>
+                        <form id="bloodEntryForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3"><label class="form-label">Date *</label><input type="date" class="form-control" id="date" required></div>
+                                <div class="col-md-6 mb-3"><label class="form-label">Bag Number *</label><input type="text" class="form-control" id="bagNo" required placeholder="e.g., B-2024-001"></div>
+                            </div>
+                            <div class="mb-3"><label class="form-label">Patient Name *</label><input type="text" class="form-control" id="patientName" required></div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3"><label class="form-label">Age *</label><input type="number" class="form-control" id="age" required></div>
+                                <div class="col-md-6 mb-3"><label class="form-label">Gender *</label><select class="form-select" id="gender" required><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+                            </div>
+                            <div class="mb-3"><label class="form-label">Blood Group *</label><select class="form-select" id="bloodGroup" required><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+                            <div class="mb-3"><label class="form-label">Received By (Lab Staff) *</label><input type="text" class="form-control" id="receivedBy" readonly style="background:#e9ecef"></div>
+                            <div class="mb-3"><label class="form-label">Blood Expiry Date *</label><input type="date" class="form-control" id="expiryDate" required></div>
+                            <div class="mb-3"><label class="form-label">Attendant Name *</label><input type="text" class="form-control" id="attendantName" required placeholder="Person who brought sample"></div>
+                            <div class="mb-3"><label class="form-label">Attendant Phone *</label><input type="tel" class="form-control" id="attendantPhone" required placeholder="03XXXXXXXXX"></div>
+                            <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save"></i> Save Entry & Sync to Cloud</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receipt Preview -->
+            <div class="col-lg-6">
+                <div class="card no-print">
+                    <div class="card-header"><i class="fas fa-receipt"></i> Receipt Preview</div>
+                    <div class="card-body">
+                        <div id="receiptPreview" class="receipt">
+                            <div class="receipt-header text-center"><h5>ALTAMASH GENERAL HOSPITAL</h5><p>Laboratory Blood Storage</p></div>
+                            <div class="receipt-details">
+                                <div class="d-flex justify-content-between"><span>Date:</span><span id="previewDate">-</span></div>
+                                <div class="d-flex justify-content-between"><span>Bag No:</span><span id="previewBagNo">-</span></div>
+                                <div class="d-flex justify-content-between"><span>Patient:</span><span id="previewPatientName">-</span></div>
+                                <div class="d-flex justify-content-between"><span>Age/Gender:</span><span id="previewAgeGender">-/-</span></div>
+                                <div class="d-flex justify-content-between"><span>Blood Group:</span><span id="previewBloodGroup">-</span></div>
+                                <div class="d-flex justify-content-between"><span>Received By:</span><span id="previewReceivedBy">-</span></div>
+                                <div class="d-flex justify-content-between"><span>Expiry:</span><span id="previewExpiryDate">-</span></div>
+                                <div class="d-flex justify-content-between"><span>Attendant:</span><span id="previewAttendantName">-</span></div>
+                                <div class="d-flex justify-content-between"><span>Phone:</span><span id="previewAttendantPhone">-</span></div>
+                            </div>
+                            <div class="text-center mt-2"><small>Thank you | Contact: 021-35187010</small></div>
+                        </div>
+                        <div class="d-grid gap-2 mt-3">
+                            <button id="printReceipt" class="btn btn-success" disabled><i class="fas fa-print"></i> Print Receipt</button>
+                            <button id="exportData" class="btn btn-info"><i class="fas fa-download"></i> Export CSV</button>
+                            <button id="syncToSheetsBtn" class="btn btn-warning"><i class="fas fa-cloud-upload-alt"></i> Manual Sync to Google Sheets</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="printable-receipt" style="display: none; width: 80mm; font-family: monospace; padding: 5px;">
+                    <div style="text-align:center"><strong>ALTAMASH GENERAL HOSPITAL</strong><br>Lab Blood Storage<br></div>
+                    <div id="printContent"></div>
+                    <div style="text-align:center">Keep this receipt</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Records Table -->
+        <div class="row mt-4 no-print">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between flex-wrap">
+                        <span><i class="fas fa-table"></i> Blood Storage Records</span>
+                        <div class="d-flex gap-2 mt-2 mt-sm-0">
+                            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search...">
+                            <select id="filterStatus" class="form-select form-select-sm"><option value="all">All</option><option value="valid">Valid</option><option value="expired">Expired</option><option value="received">Received</option></select>
+                        </div>
+                    </div>
+                    <div class="card-body p-2 p-md-3">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm">
+                                <thead>
+                                    <tr><th>Date</th><th>Bag No</th><th>Patient</th><th>Blood Group</th><th>Expiry</th><th>Status</th><th>Received By</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="recordsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Google Sheets Setup Modal -->
+<div class="modal fade" id="googleSheetsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fab fa-google"></i> Free Google Sheets Integration</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="alert alert-success"><i class="fas fa-check-circle"></i> Connect to save all records automatically to Google Sheets (FREE)</div>
+                <h6>📋 Quick Setup Guide:</h6>
+                <ol>
+                    <li>Create a Google Sheet, add headers: Date, Bag No, Patient Name, Age, Gender, Blood Group, Received By, Expiry Date, Attendant, Phone, Status, Received Date</li>
+                    <li>Open Extensions → Apps Script, paste the backend code below.</li>
+                    <li>Deploy as Web App → Execute as "Me", Access "Anyone". Copy the URL.</li>
+                    <li>Paste the URL below and click Save.</li>
+                </ol>
+                <input type="url" id="googleScriptUrl" class="form-control mb-2" placeholder="Paste your Google Apps Script Web App URL">
+                <button id="saveSheetConfig" class="btn btn-primary w-100">💾 Save Configuration</button>
+                <hr>
+                <details><summary><strong>📜 Copy this code into Apps Script</strong></summary>
+                <pre style="background:#f4f4f4; padding:8px; font-size:11px; overflow-x:auto;">
+function doPost(e) {
+  var data = JSON.parse(e.postData.contents);
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  sheet.appendRow([data.date, data.bagNo, data.patientName, data.age, data.gender, 
+                   data.bloodGroup, data.receivedBy, data.expiryDate, data.attendantName, 
+                   data.attendantPhone, data.bloodReceived ? "Yes" : "No", 
+                   data.receivedDate || "", new Date()]);
+  return ContentService.createTextOutput(JSON.stringify({result: "success"}));
+}
+function doGet() { return ContentService.createTextOutput("Active"); }
+                </pre>
+                </details>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Staff Credentials - Username and corresponding password (based on provided ID numbers)
+    const staffCredentials = {
+        "RAIKHTA-LAB": "122",
+        "MEHBOOB-LAB": "123",
+        "SYED MEHMOOD-LAB": "124",
+        "ALI NAWAZ-LAB": "125",
+        "ALI REHMAN-LAB": "126",
+        "ADNAN-LAB": "127",
+        "SUFFYAN-LAB": "128",
+        "AIJAZ-LAB": "129",
+        "WAHEED-LAB": "130",
+        "SADIQ-LAB": "131",
+        "EJAZ-LAB": "132",
+        "NOOR-LAB": "133",
+        "ARSHAD-LAB": "134",
+        "SABA-LAB": "135"
+    };
+    
+    let currentLoggedInUser = null;
+    let records = JSON.parse(localStorage.getItem('bloodStorageRecords')) || [];
+    let googleSheetUrl = localStorage.getItem('googleSheetWebhook') || '';
+    
+    // DOM elements
+    const loginPage = document.getElementById('loginPage');
+    const mainApp = document.getElementById('mainApp');
+    const loginForm = document.getElementById('loginForm');
+    const staffSelect = document.getElementById('staffSelect');
+    const passwordInput = document.getElementById('password');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const currentUserNameSpan = document.getElementById('currentUserName');
+    const receivedByField = document.getElementById('receivedBy');
+    const bloodEntryForm = document.getElementById('bloodEntryForm');
+    const printReceiptBtn = document.getElementById('printReceipt');
+    const exportDataBtn = document.getElementById('exportData');
+    const recordsTable = document.getElementById('recordsTable');
+    const searchInput = document.getElementById('searchInput');
+    const filterStatus = document.getElementById('filterStatus');
+    const totalRecordsEl = document.getElementById('totalRecords');
+    const todayRecordsEl = document.getElementById('todayRecords');
+    const expiredRecordsEl = document.getElementById('expiredRecords');
+    const validRecordsEl = document.getElementById('validRecords');
+    const syncToSheetsBtn = document.getElementById('syncToSheetsBtn');
+    const saveSheetConfig = document.getElementById('saveSheetConfig');
+    const googleScriptUrlInput = document.getElementById('googleScriptUrl');
+    
+    // Set default dates
+    const todayDate = new Date();
+    document.getElementById('date').valueAsDate = todayDate;
+    const defaultExpiry = new Date();
+    defaultExpiry.setDate(defaultExpiry.getDate() + 35);
+    document.getElementById('expiryDate').valueAsDate = defaultExpiry;
+    
+    // Helper Functions
+    function formatDate(dateStr) { if(!dateStr) return '-'; return new Date(dateStr).toLocaleDateString(); }
+    function isSampleValid(expiryDate) { return new Date(expiryDate) >= new Date(); }
+    
+    function updateStats() {
+        totalRecordsEl.innerText = records.length;
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todayCount = records.filter(r => r.date === todayStr).length;
+        todayRecordsEl.innerText = todayCount;
+        const expiredCount = records.filter(r => !isSampleValid(r.expiryDate) && !r.bloodReceived).length;
+        expiredRecordsEl.innerText = expiredCount;
+        const validCount = records.filter(r => isSampleValid(r.expiryDate) && !r.bloodReceived).length;
+        validRecordsEl.innerText = validCount;
+    }
+    
+    function updateRecordsTable() {
+        if(!recordsTable) return;
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusFilter = filterStatus.value;
+        let filtered = records.filter(rec => {
+            const matchSearch = rec.bagNo.toLowerCase().includes(searchTerm) || rec.patientName.toLowerCase().includes(searchTerm) || rec.attendantPhone.includes(searchTerm);
+            let matchStatus = true;
+            if(statusFilter === 'valid') matchStatus = isSampleValid(rec.expiryDate) && !rec.bloodReceived;
+            else if(statusFilter === 'expired') matchStatus = !isSampleValid(rec.expiryDate) && !rec.bloodReceived;
+            else if(statusFilter === 'received') matchStatus = rec.bloodReceived === true;
+            return matchSearch && matchStatus;
+        });
+        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+        recordsTable.innerHTML = '';
+        if(filtered.length === 0) { recordsTable.innerHTML = '<tr><td colspan="8" class="text-center">No records found</td></tr>'; return; }
+        filtered.forEach(rec => {
+            const isExpired = !isSampleValid(rec.expiryDate);
+            let badge = rec.bloodReceived ? '<span class="badge-received">✓ Received</span>' : (isExpired ? '<span class="badge-expired">Expired</span>' : '<span class="badge-valid">Valid</span>');
+            let rowClass = (isExpired && !rec.bloodReceived) ? 'table-danger' : (rec.bloodReceived ? 'table-info' : '');
+            const row = `<tr class="${rowClass}">
+                <td>${formatDate(rec.date)}</td><td>${rec.bagNo}</td><td>${rec.patientName}</td><td>${rec.bloodGroup}</td>
+                <td>${formatDate(rec.expiryDate)}</td><td>${badge}</td><td>${rec.receivedBy}</td>
+                <td>
+                    <button class="btn btn-sm btn-info view-btn" data-id="${rec.id}"><i class="fas fa-eye"></i></button>
+                    ${!rec.bloodReceived ? `<button class="btn btn-sm btn-warning mark-btn" data-id="${rec.id}"><i class="fas fa-check"></i></button>` : `<span class="text-success ms-1"><i class="fas fa-check-circle"></i></span>`}
+                    <button class="btn btn-sm btn-danger delete-btn" data-id="${rec.id}"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+            recordsTable.insertAdjacentHTML('beforeend', row);
+        });
+        document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', (e) => { let id = parseInt(btn.dataset.id); let rec = records.find(r=>r.id===id); if(rec) updateReceiptPreview(rec); printReceiptBtn.disabled=false; }));
+        document.querySelectorAll('.mark-btn').forEach(btn => btn.addEventListener('click', (e) => { let id = parseInt(btn.dataset.id); if(confirm('Mark this blood sample as received by patient?')) { let idx = records.findIndex(r=>r.id===id); if(idx!==-1){ records[idx].bloodReceived=true; records[idx].receivedDate=new Date().toISOString().split('T')[0]; localStorage.setItem('bloodStorageRecords', JSON.stringify(records)); updateRecordsTable(); updateStats(); showToast('Sample marked as received!', 'success'); syncAllToGoogleSheets(); } } }));
+        document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', (e) => { let id = parseInt(btn.dataset.id); if(confirm('Delete this record permanently?')){ records = records.filter(r=>r.id!==id); localStorage.setItem('bloodStorageRecords', JSON.stringify(records)); updateRecordsTable(); updateStats(); showToast('Record deleted', 'danger'); syncAllToGoogleSheets(); } }));
+    }
+    
+    function updateReceiptPreview(entry) {
+        document.getElementById('previewDate').innerText = formatDate(entry.date);
+        document.getElementById('previewBagNo').innerText = entry.bagNo;
+        document.getElementById('previewPatientName').innerText = entry.patientName;
+        document.getElementById('previewAgeGender').innerText = `${entry.age}/${entry.gender}`;
+        document.getElementById('previewBloodGroup').innerText = entry.bloodGroup;
+        document.getElementById('previewReceivedBy').innerText = entry.receivedBy;
+        document.getElementById('previewExpiryDate').innerText = formatDate(entry.expiryDate);
+        document.getElementById('previewAttendantName').innerText = entry.attendantName;
+        document.getElementById('previewAttendantPhone').innerText = entry.attendantPhone;
+        window.currentReceiptEntry = entry;
+    }
+    
+    printReceiptBtn.addEventListener('click', () => {
+        if(!window.currentReceiptEntry) return;
+        let e = window.currentReceiptEntry;
+        let printDiv = document.getElementById('printable-receipt');
+        document.getElementById('printContent').innerHTML = `<div style="font-family:monospace; font-size:12px;">
+            <div>Date: ${formatDate(e.date)}</div><div>Bag No: ${e.bagNo}</div><div>Patient: ${e.patientName}</div>
+            <div>Age/Gender: ${e.age}/${e.gender}</div><div>Blood Group: ${e.bloodGroup}</div>
+            <div>Received By: ${e.receivedBy}</div><div>Expiry: ${formatDate(e.expiryDate)}</div>
+            <div>Attendant: ${e.attendantName}</div><div>Phone: ${e.attendantPhone}</div>
+            <hr><div style="text-align:center">Thank you - Altamash Hospital</div>
+        </div>`;
+        printDiv.style.display = 'block';
+        window.print();
+        setTimeout(() => { printDiv.style.display = 'none'; }, 500);
+    });
+    
+    async function sendToGoogleSheets(record) {
+        if(!googleSheetUrl) return false;
+        try {
+            await fetch(googleSheetUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(record) });
+            return true;
+        } catch(err) { return false; }
+    }
+    
+    async function syncAllToGoogleSheets() {
+        if(!googleSheetUrl) { showToast('Google Sheets not configured. Click setup link.', 'warning'); return; }
+        showToast('Syncing all records to Google Sheets...', 'info');
+        for(let rec of records) await sendToGoogleSheets(rec);
+        showToast('Sync completed!', 'success');
+    }
+    
+    bloodEntryForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if(!currentLoggedInUser) { alert('Session expired. Please login again.'); return; }
+        const newEntry = {
+            id: Date.now(), date: document.getElementById('date').value, bagNo: document.getElementById('bagNo').value,
+            patientName: document.getElementById('patientName').value, age: document.getElementById('age').value,
+            gender: document.getElementById('gender').value, bloodGroup: document.getElementById('bloodGroup').value,
+            receivedBy: currentLoggedInUser, expiryDate: document.getElementById('expiryDate').value,
+            attendantName: document.getElementById('attendantName').value, attendantPhone: document.getElementById('attendantPhone').value,
+            bloodReceived: false, receivedDate: null
+        };
+        records.unshift(newEntry);
+        localStorage.setItem('bloodStorageRecords', JSON.stringify(records));
+        updateReceiptPreview(newEntry);
+        printReceiptBtn.disabled = false;
+        updateRecordsTable();
+        updateStats();
+        bloodEntryForm.reset();
+        document.getElementById('date').valueAsDate = new Date();
+        document.getElementById('expiryDate').valueAsDate = defaultExpiry;
+        showToast('Record saved successfully!', 'success');
+        if(googleSheetUrl) await sendToGoogleSheets(newEntry);
+    });
+    
+    exportDataBtn.addEventListener('click', () => {
+        if(records.length===0) return alert('No data to export');
+        let headers = ['Date','Bag No','Patient','Age','Gender','Blood Group','Received By','Expiry Date','Attendant','Phone','Status','Received Date'];
+        let rows = records.map(r => [`${r.date}`,`${r.bagNo}`,`${r.patientName}`,r.age,r.gender,r.bloodGroup,`${r.receivedBy}`,r.expiryDate,`${r.attendantName}`,`${r.attendantPhone}`, r.bloodReceived?'Received':'Pending', r.receivedDate||'']).map(row => row.join(','));
+        let csv = [headers.join(','), ...rows].join('\n');
+        let blob = new Blob([csv], {type: 'text/csv'});
+        let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `blood_records_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
+        showToast('CSV exported successfully!', 'success');
+    });
+    
+    syncToSheetsBtn.addEventListener('click', syncAllToGoogleSheets);
+    saveSheetConfig.addEventListener('click', () => {
+        let url = googleScriptUrlInput.value.trim();
+        if(url && (url.startsWith('https://script.google.com'))) {
+            localStorage.setItem('googleSheetWebhook', url);
+            googleSheetUrl = url;
+            showToast('Google Sheets configuration saved!', 'success');
+            $('#googleSheetsModal').modal('hide');
+        } else { alert('Please enter a valid Google Apps Script Web App URL'); }
+    });
+    
+    function showToast(msg, type) {
+        let toastDiv = document.createElement('div');
+        toastDiv.className = `alert alert-${type==='success'?'success':(type==='danger'?'danger':'warning')} position-fixed top-0 end-0 m-3`;
+        toastDiv.style.zIndex = '9999'; toastDiv.innerText = msg;
+        document.body.appendChild(toastDiv);
+        setTimeout(() => toastDiv.remove(), 3000);
+    }
+    
+    // Login Logic - Simple username from dropdown and password check
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const selectedValue = staffSelect.value;
+        if(!selectedValue) { alert('Please select your username from the list'); return; }
+        const [username, expectedPassword] = selectedValue.split('|');
+        const enteredPass = passwordInput.value.trim();
+        if(staffCredentials[username] && staffCredentials[username] === enteredPass) {
+            currentLoggedInUser = username;
+            currentUserNameSpan.innerText = username;
+            receivedByField.value = username;
+            loginPage.style.display = 'none';
+            mainApp.style.display = 'block';
+            updateRecordsTable();
+            updateStats();
+            if(googleSheetUrl) syncAllToGoogleSheets();
+        } else { alert('Invalid password! Please enter the correct password for this username.'); }
+    });
+    
+    logoutBtn.addEventListener('click', () => {
+        currentLoggedInUser = null;
+        loginPage.style.display = 'flex';
+        mainApp.style.display = 'none';
+        staffSelect.value = '';
+        passwordInput.value = '';
+        receivedByField.value = '';
+    });
+    
+    if(googleSheetUrl) googleScriptUrlInput.value = googleSheetUrl;
+    searchInput?.addEventListener('input', () => updateRecordsTable());
+    filterStatus?.addEventListener('change', () => updateRecordsTable());
+    window.addEventListener('load', () => { updateStats(); });
+</script>
+</body>
+</html>
